@@ -13,6 +13,7 @@
                     <option value="<?php echo $coupon->ID; ?>"><?php echo $coupon->post_title; ?></option>
                 <?php endforeach;?>
             </select>
+            <input type="hidden" class="coupon_name" name="coupon_name" value="">
         </div>
             <div class="ec-product form-row">
 
@@ -32,6 +33,8 @@
                 const data =  await response.json()
                 if(data.length != 0) {
                     console.log(data)
+                    const coupon_name = document.querySelector('.coupon_name')
+                    coupon_name.value = data['code']
                     renderProduct(data)
                 }
                     
@@ -65,39 +68,45 @@
             const ec_product = document.querySelector('.ec-product')
 
             const products = await getProducts(data.product_ids)
-            products.forEach(element => {
+            if(products){
+                products.forEach(element => {
 
-                const col_parent = divElement("form-row")
-                const col_1 = divElement( "form-group col" )
-                const col_2 = divElement( "form-group col" )
-                const col_3 = divElement( "form-group col" )
-                const col_4 = divElement( "form-inline" )
+                    const col_parent = divElement("form-row")
+                    const col_1 = divElement( "form-group col" )
+                    const col_2 = divElement( "form-group col" )
+                    const col_3 = divElement( "form-group col" )
+                    const col_4 = divElement( "form-inline" )
 
-                col_1.append(
-                    labelElement( 'product' ) ,
-                    inputElement( 'hidden', 'product_id' , element['id'], 'form-control'),
-                    inputElement( 'text', 'product_name' , element['name'], 'form-control', true)
-                )
+                    col_1.append(
+                        labelElement( 'Product' ) ,
+                        inputElement( 'hidden', 'product_id' , element['id'], 'form-control'),
+                        inputElement( 'text', 'product_name' , element['name'], 'form-control', true)
+                    )
 
-                col_2.append( 
-                    labelElement( 'Discount type' ),
-                    inputElement( 'text', 'discount_type' , data['discount_type'], 'form-control', true) 
-                )
-                col_3.append( 
-                    labelElement( 'Amount' ),
-                    inputElement( 'text', 'coupon_amount' , data['amount'], 'form-control')
-                )
+                    col_2.append( 
+                        labelElement( 'Discount type' ),
+                        inputElement( 'text', 'discount_type' , data['discount_type'], 'form-control', true) 
+                    )
+                    col_3.append( 
+                        labelElement( 'Amount' ),
+                        inputElement( 'text', 'coupon_amount' , data['amount'], 'form-control')
+                    )
 
-                col_4.append( buttonElement( "Guardar", "btn btn-primary" ) )
-                
-                col_parent.append( 
-                    col_1, 
-                    col_2, 
-                    col_3,
-                    col_4
-                    ) 
-                ec_product.append( col_parent )
-            });
+                    col_4.append( buttonElement( "Guardar", "btn btn-primary" ) )
+
+                    col_parent.append( 
+                        col_1, 
+                        col_2, 
+                        col_3,
+                        col_4
+                        ) 
+                    ec_product.append( col_parent )
+                    });
+            }else{
+                const h1 = document.createElement("h1")
+                h1.innerText = "No hay productos relacionado al cupon."
+                ec_product.append( h1 )
+            }
             
          }
          //Create a label Element

@@ -14,7 +14,7 @@ Class ExtendsCouponAdmin{
         add_action( 'admin_menu', array( $this, 'add_submenu_page' ) );
         add_action( 'rest_api_init', array($this, 'coupon_endpoint') );
         add_action( 'rest_api_init', array($this, 'products_endpoint') );
-        add_filter( 'woocommerce_coupon_get_discount_amount',  array($this,'alter_shop_coupon_data'), 20, 5 );
+        add_filter( 'woocommerce_coupon_get_discount_amount',  array($this->page,'alter_shop_coupon_data'), 20, 5 );
     }
  
     /**
@@ -58,35 +58,6 @@ Class ExtendsCouponAdmin{
             'methods'  => WP_REST_Server::READABLE,
             'callback' => array( $this->page, 'getProductIDs'),
         ) );
-    }
-
-    
-    function alter_shop_coupon_data( $round, $discounting_amount, $cart_item, $single, $coupon ){
-        $db = new ModelCoupon();
-        $log = new WC_Logger();
-
-        $log->add('new-woocommerce-log-name',$coupon->get_code());
-        $result = $db->getCoupon($coupon->get_code());
-
-        $log_entry = print_r( $single, true );
-        $log->add( 'new-woocommerce-log-name', $log_entry );
-        $log->add( 'new-woocommerce-log-name', $cart_item['product_id'] );
-
-        if( $result->post_title == $coupon->get_code()){
-            $item = $db->getCouponToProduct($result->id, $cart_item['product_id']);
-                
-            if( isset($item) ){
-                $log_entry = print_r( $item, true );
-                $log->add( 'new-woocommerce-log-name', "product: " );
-                $log->add( 'new-woocommerce-log-name', $log_entry );
-                
-                $discount = (float) $item->coupon_amount * ( $discounting_amount / 100 );
-                $round = round( min( $discount, $discounting_amount ), wc_get_rounding_precision() );
-            }
-            
-        }
-        //if($coupon->is_type('percent') && ){}
-        return $round;
     }
     
 }

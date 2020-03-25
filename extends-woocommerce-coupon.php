@@ -50,10 +50,9 @@ function db_create() {
   
     $created = dbDelta(  
       "CREATE TABLE IF NOT EXISTS $coupon (
-          `id` INT NOT NULL AUTO_INCREMENT,
           `post_id` INT NOT NULL,
           `post_title` VARCHAR(45) NULL,
-          PRIMARY KEY (`id`)
+          PRIMARY KEY (`post_id`)
       ) $charset_collate;"
     );
   
@@ -65,10 +64,25 @@ function db_create() {
             `product_id` INT NOT NULL,
             `discount_type` VARCHAR(200),
             `coupon_amount` INT NOT NULL,
-            FOREIGN KEY (`coupon_id`) REFERENCES $coupon(`id`)
+            FOREIGN KEY (`coupon_id`) REFERENCES $coupon(`post_id`)
         ) $charset_collate;"
     );
   
   
   } 
   register_activation_hook( __FILE__, 'db_create' );
+
+
+function hc_delete_plugin_database_tables(){
+  global $wpdb;
+  $tableArray = [
+    $wpdb->prefix . "ec_coupon_to_product",
+    $wpdb->prefix . "ec_coupon"
+ ];
+
+  foreach ($tableArray as $tablename) {
+    $wpdb->query("DROP TABLE IF EXISTS {$tablename}");
+  }
+}
+//register_deactivation_hook(__FILE__, 'hc_delete_plugin_database_tables');
+register_uninstall_hook(__FILE__, 'hc_delete_plugin_database_tables');
