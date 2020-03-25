@@ -10,6 +10,7 @@ class ModelCoupon
 
     public function save()
     {
+        global $wpdb;
         $error = $this->validate($_POST);
         if ( ! ( $this->has_valid_nonce() && current_user_can( 'manage_options' ) ) && !empty($error) ) {
             // TODO: Display an error message.
@@ -20,9 +21,13 @@ class ModelCoupon
         $item = $this->getCouponToProduct($_POST['coupon_id'], $_POST['product_id'],$_POST['coupon_amount']);
         if( empty($item) )
         {
-            $this->insertCouponToProduct($_POST);
+            //Verificar que consecuencia trae el intentar guardar un cupon registrado
+            $result = $this->insertCoupon($_POST['coupon_id'], $_POST['coupon_name']);
+            $result = $this->insertCouponToProduct($_POST['coupon_id'], $_POST['product_id'],$_POST['discount_type'],$_POST['coupon_amount'] );
         }else{
-            $this->updatetCouponToProduct($_POST);
+            //echo "test";
+            //print_r($wpdb);
+            $this->updatetCouponToProduct( $_POST['coupon_id'], $_POST['product_id'],$_POST['discount_type'],$_POST['coupon_amount'] );
         }
         return wp_send_json($_POST);
     }
@@ -73,47 +78,62 @@ class ModelCoupon
         return $result;
     }
 
-    public function insertCouponToProduct($data)
+    public function insertCoupon( $post_id , $post_title)
     {
         global $wpdb;
 
-        $wpdb->insert("{$wpdb->prefix}ec_coupon",
+        $result = $wpdb->insert("{$wpdb->prefix}ec_coupon",
             array(
-                'coupon_id' => $data['coupon'],
-                'product_id' => $data['id'],
-                'discount_type' => $data['discount_type'],
-                'coupon_amount' => $data['coupon_amount']
+                'post_id' => $post_id,
+                'post_title' => $post_title
             )
         );
+        return $wpdb;
     }
 
-    public function updatetCouponToProduct($data)
+    public function insertCouponToProduct( $post_id , $product_id, $discount_type, $coupon_amount)
     {
         global $wpdb;
 
-        $where = [ 'id' => NULL ];
-        $wpdb->update("{$wpdb->prefix}ec_coupon",
+        $wpdb->insert("{$wpdb->prefix}ec_coupon_to_product",
             array(
-                'coupon_id' => $data['coupon'],
-                'product_id' => $data['id'],
-                'discount_type' => $data['discount_type'],
-                'coupon_amount' => $data['coupon_amount']
+                'coupon_id' => $post_id,
+                'product_id' => $product_id,
+                'discount_type' => $discount_type,
+                'coupon_amount' => $coupon_amount
+            )
+        );
+        return $wpdb;
+    }
+
+    public function updatetCouponToProduct($post_id , $product_id, $discount_type, $coupon_amount)
+    {
+        global $wpdb;
+
+        $where = [ 'coupon_id' => $post_id ];
+        $wpdb->update("{$wpdb->prefix}ec_coupon_to_product",
+            array(
+                'coupon_id' => $post_id,
+                'product_id' => $product_id,
+                'discount_type' => $discount_type,
+                'coupon_amount' => $coupon_amount
             ),
             $where
         );
     }
 
-    public function getCouponToProduct($id, $product_id, $amount =  null )
+    public function getCouponToProduct($id, $product_id )
     {
         global $wpdb;
 
         //If exists $amount
-        $sql = "SELECT * FROM {$wpdb->prefix}ec_coupon_to_product WHERE coupon_id={$id} AND product_id={$product_id} ";
+        $sql = "SELECT * FROM {$wpdb->prefix}ec_coupon c 
+        LEFT JOIN {$wpdb->prefix}ec_coupon_to_product cp ON cp.product_id={$product_id}
+        WHERE c.post_id={$id} AND cp.coupon_id ={$id}";
         //$sql .= ( $amount != null ) ? "AND coupon_amount={$amount}" : "";
         $result = $wpdb->get_row(
             $wpdb->prepare($sql)
         );
-        print_r($result);
         return $result;
     }
 

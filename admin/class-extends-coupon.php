@@ -94,6 +94,30 @@ class ExtendsCoupon
         //$data = new WC_Product($params['product_ids']);
         //return ( $data->code != "null" ) ?  new WP_REST_Response( json_decode($data), 200) : new WP_REST_Response(array(), 200);
     }
+
+    function alter_shop_coupon_data( $round, $discounting_amount, $cart_item, $single, $coupon ){
+  
+        $result = self::$db->getCoupon($coupon->get_code());
+
+        if( $result->post_title == $coupon->get_code()){
+            $item = self::$db->getCouponToProduct($result->post_id, $cart_item['product_id']);
+            if( isset($item) ){
+            
+                $discount = (float) $item->coupon_amount * ( $discounting_amount / 100 );
+                $round = round( min( $discount, $discounting_amount ), wc_get_rounding_precision() );
+            }
+            
+        }
+        //if($coupon->is_type('percent') && ){}
+        return $round;
+    }
+
+    private function log( $file, $data)
+    {
+        $log = new WC_Logger();
+        $data = (is_array($data)) ? print_r($data, true) : $data;
+        $log->add($file ,$data);
+    }
 }
 
 ?>
