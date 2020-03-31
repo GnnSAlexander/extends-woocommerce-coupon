@@ -19,7 +19,8 @@ class ExtendsCoupon
     {
         $coupons = self::$db->getCoupons();
         $form = array(
-            "action" => "create",
+            "create" => "create",
+            "update" => "update",
             "page" => self::MENU_SLUG,
         );
 
@@ -47,13 +48,29 @@ class ExtendsCoupon
         return self::view('views/create.php', compact('coupons', 'form' ));
     }
 
+    public function update()
+    {
+        if( isset($_GET['post_id']) )
+        {
+            $products = self::$db->getCouponToProductById( $_GET['post_id'] );
+
+            var_dump( $products );
+        }
+        return self::view('views/update.php', compact('products'));
+    }
+
     public function route()
     {
+        //I need to change this
         echo '<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">';
+
         switch( $_GET['action'] )
         {
             case 'create':
                 self::create();
+                break;
+            case 'update':
+                self::update();
                 break;
             case 'json':
                 self::getCoupon($_GET['id']);

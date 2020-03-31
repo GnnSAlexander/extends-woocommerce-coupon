@@ -92,7 +92,7 @@
                         inputElement( 'text', 'coupon_amount' , data['amount'], 'form-control')
                     )
 
-                    col_4.append( buttonElement( "Guardar", "btn btn-primary" ) )
+                    col_4.append( buttonElement( "Guardar", "save btn btn-primary" ) )
 
                     col_parent.append( 
                         col_1, 
@@ -102,6 +102,16 @@
                         ) 
                     ec_product.append( col_parent )
                     });
+
+                    const buttons =  document.querySelectorAll(".save")
+                    buttons.forEach(button => {
+                        button.addEventListener("click", function(event){
+                            event.preventDefault()
+                            const parent = button.parentElement.parentElement
+                            save( parent )
+                        })
+                    })
+                    
             }else{
                 const h1 = document.createElement("h1")
                 h1.innerText = "No hay productos relacionado al cupon."
@@ -144,9 +154,34 @@
             return button
          }
 
-         function save()
+         async function save( parent )
          {
 
+            const formData = new FormData()
+            formData.append('coupon_id', document.querySelector("#coupon").value)
+            formData.append('product_id', parent.querySelector("input[name='product_id']").value)
+            formData.append('discount_type', parent.querySelector("input[name='discount_type']").value)
+            formData.append('coupon_amount', parent.querySelector("input[name='coupon_amount']").value)
+            formData.append('extends_coupon', document.querySelector("input[name='extends_coupon']").value)
+            formData.append('action', document.querySelector("input[name='action']").value)
+
+            console.log(formData)
+            const response =  await fetch("/wp-admin/admin-post.php", {
+                method: 'POST', // or 'PUT'
+                body: formData
+            })
+
+            if( response.status == 200 ){
+                const data =  await response.json()
+                if(data.length != 0) {
+                    console.log(data)
+                }
+                    
+            }else{
+                error = await response.json()
+                alert(error['message'])
+            }
+            
          }
 
 

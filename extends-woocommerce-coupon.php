@@ -62,6 +62,7 @@ function db_create() {
         "CREATE TABLE IF NOT EXISTS $coupon_product(
             `coupon_id` INT NOT NULL,
             `product_id` INT NOT NULL,
+            `product_name` VARCHAR(45) NULL,
             `discount_type` VARCHAR(200),
             `coupon_amount` INT NOT NULL,
             FOREIGN KEY (`coupon_id`) REFERENCES $coupon(`post_id`)

@@ -10,7 +10,6 @@ class ModelCoupon
 
     public function save()
     {
-        global $wpdb;
         $error = $this->validate($_POST);
         if ( ! ( $this->has_valid_nonce() && current_user_can( 'manage_options' ) ) && !empty($error) ) {
             // TODO: Display an error message.
@@ -29,7 +28,7 @@ class ModelCoupon
             //print_r($wpdb);
             $this->updatetCouponToProduct( $_POST['coupon_id'], $_POST['product_id'],$_POST['discount_type'],$_POST['coupon_amount'] );
         }
-        return wp_send_json($_POST);
+        return wp_send_json(array("message" => "success"));
     }
 
     //private function get
@@ -120,6 +119,17 @@ class ModelCoupon
             ),
             $where
         );
+    }
+
+    public function getCouponToProductById( $id )
+    {
+        global $wpdb;
+        $sql = "SELECT * FROM {$wpdb->prefix}ec_coupon_to_product WHERE coupon_id = {$id}";
+        $results =  $wpdb->get_results(
+            $wpdb->prepare( $sql )
+        );
+
+        return $results;
     }
 
     public function getCouponToProduct($id, $product_id )
