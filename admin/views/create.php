@@ -13,7 +13,7 @@
                     <option value="<?php echo $coupon->ID; ?>"><?php echo $coupon->post_title; ?></option>
                 <?php endforeach;?>
             </select>
-            <input type="hidden" class="coupon_name" name="coupon_name" value="">
+            <input type="type" class="coupon_name" name="coupon_name" value="">
         </div>
             <div class="ec-product form-row">
 
@@ -159,7 +159,9 @@
 
             const formData = new FormData()
             formData.append('coupon_id', document.querySelector("#coupon").value)
+            formData.append('coupon_name', document.querySelector("input[name='coupon_name']").value)
             formData.append('product_id', parent.querySelector("input[name='product_id']").value)
+            formData.append('product_name', parent.querySelector("input[name='product_name']").value)
             formData.append('discount_type', parent.querySelector("input[name='discount_type']").value)
             formData.append('coupon_amount', parent.querySelector("input[name='coupon_amount']").value)
             formData.append('extends_coupon', document.querySelector("input[name='extends_coupon']").value)
@@ -173,8 +175,9 @@
 
             if( response.status == 200 ){
                 const data =  await response.json()
-                if(data.length != 0) {
-                    console.log(data)
+                if(data.status == "OK") {
+                   alert("se extendio el cupon");
+                   //window.location.href = "/wp-admin/admin.php?page=extends-coupon&action=create"
                 }
                     
             }else{

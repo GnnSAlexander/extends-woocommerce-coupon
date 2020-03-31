@@ -85,5 +85,5 @@ function hc_delete_plugin_database_tables(){
     $wpdb->query("DROP TABLE IF EXISTS {$tablename}");
   }
 }
-//register_deactivation_hook(__FILE__, 'hc_delete_plugin_database_tables');
-register_uninstall_hook(__FILE__, 'hc_delete_plugin_database_tables');
+register_deactivation_hook(__FILE__, 'hc_delete_plugin_database_tables');
+//register_uninstall_hook(__FILE__, 'hc_delete_plugin_database_tables');

@@ -22,13 +22,13 @@ class ModelCoupon
         {
             //Verificar que consecuencia trae el intentar guardar un cupon registrado
             $result = $this->insertCoupon($_POST['coupon_id'], $_POST['coupon_name']);
-            $result = $this->insertCouponToProduct($_POST['coupon_id'], $_POST['product_id'],$_POST['discount_type'],$_POST['coupon_amount'] );
+            $result = $this->insertCouponToProduct($_POST['coupon_id'], $_POST['product_id'], $_POST['product_name'], $_POST['discount_type'],$_POST['coupon_amount'] );
         }else{
             //echo "test";
             //print_r($wpdb);
-            $this->updatetCouponToProduct( $_POST['coupon_id'], $_POST['product_id'],$_POST['discount_type'],$_POST['coupon_amount'] );
+            $this->updatetCouponToProduct( $_POST['coupon_id'], $_POST['product_id'], $_POST['product_name'],$_POST['discount_type'],$_POST['coupon_amount'] );
         }
-        return wp_send_json(array("message" => "success"));
+        return wp_send_json(array( "status" => "OK", "message" => "success"));
     }
 
     //private function get
@@ -90,7 +90,7 @@ class ModelCoupon
         return $wpdb;
     }
 
-    public function insertCouponToProduct( $post_id , $product_id, $discount_type, $coupon_amount)
+    public function insertCouponToProduct( $post_id , $product_id, $product_name, $discount_type, $coupon_amount)
     {
         global $wpdb;
 
@@ -98,6 +98,7 @@ class ModelCoupon
             array(
                 'coupon_id' => $post_id,
                 'product_id' => $product_id,
+                'product_name' => $product_name,
                 'discount_type' => $discount_type,
                 'coupon_amount' => $coupon_amount
             )
@@ -105,7 +106,7 @@ class ModelCoupon
         return $wpdb;
     }
 
-    public function updatetCouponToProduct($post_id , $product_id, $discount_type, $coupon_amount)
+    public function updatetCouponToProduct($post_id , $product_id, $product_name, $discount_type, $coupon_amount)
     {
         global $wpdb;
 
@@ -114,6 +115,7 @@ class ModelCoupon
             array(
                 'coupon_id' => $post_id,
                 'product_id' => $product_id,
+                'product_name' => $product_name,
                 'discount_type' => $discount_type,
                 'coupon_amount' => $coupon_amount
             ),

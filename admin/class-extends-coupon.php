@@ -53,8 +53,6 @@ class ExtendsCoupon
         if( isset($_GET['post_id']) )
         {
             $products = self::$db->getCouponToProductById( $_GET['post_id'] );
-
-            var_dump( $products );
         }
         return self::view('views/update.php', compact('products'));
     }
