@@ -9,12 +9,21 @@ class ModelCoupon
     }
 
     public function save()
-    {
-        $error = $this->validate($_POST);
-        if ( ! ( $this->has_valid_nonce() && current_user_can( 'manage_options' ) ) && !empty($error) ) {
+    {   
+        
+        if ( !( $this->has_valid_nonce() && current_user_can( 'manage_options' ) ) ) {
             // TODO: Display an error message.
-             return wp_send_json($error);
+
+            if(!$this->has_valid_nonce()){
+                $error['nonce'] = "es invalido"; 
+            }
+             return wp_send_json(array("error" => $error), 400);
             
+        }
+
+        $error = $this->validate($_POST);
+        if( !empty($error) ){
+            return wp_send_json(array("error" => $error), 400);
         }
 
         $item = $this->getCouponToProduct($_POST['coupon_id'], $_POST['product_id'],$_POST['coupon_amount']);
@@ -31,12 +40,31 @@ class ModelCoupon
         return wp_send_json(array( "status" => "OK", "message" => "success"));
     }
 
-    //private function get
+    public function update()
+    {
+        if ( !( $this->has_valid_nonce() && current_user_can( 'manage_options' ) ) ) {
+            // TODO: Display an error message.
+
+            if(!$this->has_valid_nonce()){
+                $error['nonce'] = "es invalido"; 
+            }
+             return wp_send_json(array("error" => $error), 400);
+            
+        }
+
+        $error = $this->validate($_POST);
+        if( !empty($error) ){
+            return wp_send_json(array("error" => $error), 400);
+        }
+
+        $this->updatetCouponToProduct( $_POST['coupon_id'], $_POST['product_id'], $_POST['product_name'],$_POST['discount_type'],$_POST['coupon_amount'] );
+        return wp_send_json(array( "status" => "OK", "message" => "success"));
+    }
 
     private function validate( $data )
     {
         $error = array();
-        if( !is_numeric($data['coupon_amount']) )
+        if( !is_numeric( $data['coupon_amount']) )
         {
             $error['error_amount'] = "No puede estar vacio, valor debe ser numerico";
         }
@@ -52,11 +80,10 @@ class ModelCoupon
         }
 
         $field  = wp_unslash( $_POST['extends_coupon'] );
-        $action = "extends_coupon_q{$_POST['action']}";
- 
+        $action = "extends_coupon_{$_POST['action']}";
         return wp_verify_nonce( $field, $action );
     }
-
+    //Get all coupons
     public function getCoupons()
     {
         global $wpdb;
@@ -66,7 +93,7 @@ class ModelCoupon
         );
         return $results;
     }
-
+    //Get a coupon with coupon name
     public function getCoupon($name)
     {
         global $wpdb;
@@ -77,6 +104,7 @@ class ModelCoupon
         return $result;
     }
 
+    //insert a Coupon
     public function insertCoupon( $post_id , $post_title)
     {
         global $wpdb;
@@ -89,7 +117,7 @@ class ModelCoupon
         );
         return $wpdb;
     }
-
+    //Insert a Product
     public function insertCouponToProduct( $post_id , $product_id, $product_name, $discount_type, $coupon_amount)
     {
         global $wpdb;
@@ -106,6 +134,7 @@ class ModelCoupon
         return $wpdb;
     }
 
+    //Update a product
     public function updatetCouponToProduct($post_id , $product_id, $product_name, $discount_type, $coupon_amount)
     {
         global $wpdb;
@@ -123,6 +152,7 @@ class ModelCoupon
         );
     }
 
+    //Get products with coupon_id
     public function getCouponToProductById( $id )
     {
         global $wpdb;
@@ -134,15 +164,14 @@ class ModelCoupon
         return $results;
     }
 
+    //Find if the code and the product are related
     public function getCouponToProduct($id, $product_id )
     {
         global $wpdb;
 
-        //If exists $amount
         $sql = "SELECT * FROM {$wpdb->prefix}ec_coupon c 
         LEFT JOIN {$wpdb->prefix}ec_coupon_to_product cp ON cp.product_id={$product_id}
         WHERE c.post_id={$id} AND cp.coupon_id ={$id}";
-        //$sql .= ( $amount != null ) ? "AND coupon_amount={$amount}" : "";
         $result = $wpdb->get_row(
             $wpdb->prepare($sql)
         );

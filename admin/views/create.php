@@ -13,7 +13,7 @@
                     <option value="<?php echo $coupon->ID; ?>"><?php echo $coupon->post_title; ?></option>
                 <?php endforeach;?>
             </select>
-            <input type="type" class="coupon_name" name="coupon_name" value="">
+            <input type="hidden" class="coupon_name" name="coupon_name" value="">
         </div>
             <div class="ec-product form-row">
 
@@ -35,20 +35,21 @@
                     console.log(data)
                     const coupon_name = document.querySelector('.coupon_name')
                     coupon_name.value = data['code']
-                    renderProduct(data)
+                    const products = await getProducts(data.product_ids, data['id'])
+                    renderProduct(data, products)
                 }
                     
             }else{
                 error = await response.json()
-                alert(error['message'])
+                alert(JSON.stringify(error.error))
             }
         
          }
 
-         async function getProducts( data )
+         async function getProducts( data, coupon_id )
          {
             const product_ids = JSON.stringify(data)
-            const response = await fetch("/wp-json/extends_coupon/getProductIDs?product_ids="+product_ids)
+            const response = await fetch("/wp-json/extends_coupon/getProductIDs?product_ids="+product_ids+"&coupon_id="+coupon_id)
             if( response.status == 200 ){
                 const data =  await response.json()
                 if(data.length != 0) {
@@ -58,16 +59,16 @@
                     
             }else{
                 error = await response.json()
-                alert(error['message'])
+                console.log(error)
+                alert(JSON.stringify(error.error))
             }
          }
 
          //
-         async function renderProduct( data )
+         async function renderProduct(data, products )
          {
             const ec_product = document.querySelector('.ec-product')
 
-            const products = await getProducts(data.product_ids)
             if(products){
                 products.forEach(element => {
 
@@ -79,8 +80,8 @@
 
                     col_1.append(
                         labelElement( 'Product' ) ,
-                        inputElement( 'hidden', 'product_id' , element['id'], 'form-control'),
-                        inputElement( 'text', 'product_name' , element['name'], 'form-control', true)
+                        inputElement( 'hidden', 'product_id' , element['data']['id'], 'form-control'),
+                        inputElement( 'text', 'product_name' , element['data']['name'], 'form-control', true)
                     )
 
                     col_2.append( 
@@ -182,7 +183,8 @@
                     
             }else{
                 error = await response.json()
-                alert(error['message'])
+                console.log(error)
+                alert(JSON.stringify(error.error))
             }
             
          }

@@ -53,8 +53,17 @@ class ExtendsCoupon
         if( isset($_GET['post_id']) )
         {
             $products = self::$db->getCouponToProductById( $_GET['post_id'] );
+            var_dump( $products);
         }
-        return self::view('views/update.php', compact('products'));
+
+        $form = array(
+            "action" => "update_coupon",
+            "page" => self::MENU_SLUG,
+        );
+
+        $coupon_id = $_GET['post_id'];
+
+        return self::view('views/update.php', compact('coupon_id', 'products', 'form'));
     }
 
     public function route()
@@ -97,12 +106,17 @@ class ExtendsCoupon
     function getProductIDs( $request ) {
         $params = $request->get_params();
         $products = array();
+        //self::$db->getCouponToProductById( $params['coupon_id'] );
         foreach(json_decode($params['product_ids']) as $id )
         {
             $product = new WC_Product( $id );
             //print($product->id);
             if( $product->id == $id ){
-                $products[] = json_decode($product);
+                $products[] = array(
+                    "data" => json_decode($product),
+                    "saved" => true
+                );
+
             }
         }
         return new WP_REST_Response($products, 200);
